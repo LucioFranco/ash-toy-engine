@@ -1,0 +1,9 @@
+[package]
+name = "ash-toy-engine"
+version = "0.0.0"
+authors = ["Lucio Franco <luciofranco14@gmail.com>"]
+
+[dependencies]
+ash = "0.24"
+winit = "0.17"
+winapi = "*"
