@@ -26,26 +26,42 @@ pub fn create_surface<E: EntryV1_0, I: InstanceV1_0>(
 }
 
 #[cfg(target_os = "macos")]
+use ash::extensions::MacOSSurface;
+#[cfg(target_os = "macos")]
+use cocoa::appkit::{NSView, NSWindow};
+#[cfg(target_os = "macos")]
+use cocoa::base::id as cocoa_id;
+#[cfg(target_os = "macos")]
+use metal::CoreAnimationLayer;
+#[cfg(target_os = "macos")]
+use objc::runtime::YES;
+#[cfg(target_os = "macos")]
+use std::mem;
+
+#[cfg(target_os = "macos")]
 pub fn create_surface<E: EntryV1_0, I: InstanceV1_0>(
     entry: &E,
     instance: &I,
-    window: &winit::Window,
+    window: &Window,
 ) -> Result<vk::SurfaceKHR, vk::Result> {
+    use std::mem;
     use winit::os::macos::WindowExt;
 
-    let wnd: cocoa_id = mem::transmute(window.get_nswindow());
+    unsafe {
+        let wnd: cocoa_id = mem::transmute(window.get_nswindow());
 
-    let layer = CoreAnimationLayer::new();
+        let layer = CoreAnimationLayer::new();
 
-    layer.set_edge_antialiasing_mask(0);
-    layer.set_presents_with_transaction(false);
-    layer.remove_all_animations();
+        layer.set_edge_antialiasing_mask(0);
+        layer.set_presents_with_transaction(false);
+        layer.remove_all_animations();
 
-    let view = wnd.contentView();
+        let view = wnd.contentView();
 
-    layer.set_contents_scale(view.backingScaleFactor());
-    view.setLayer(mem::transmute(layer.as_ref()));
-    view.setWantsLayer(YES);
+        layer.set_contents_scale(view.backingScaleFactor());
+        view.setLayer(mem::transmute(layer.as_ref()));
+        view.setWantsLayer(YES);
+    }
 
     let create_info = vk::MacOSSurfaceCreateInfoMVK {
         s_type: vk::StructureType::MacOSSurfaceCreateInfoMvk,
@@ -70,18 +86,20 @@ pub fn create_surface<E: EntryV1_0, I: InstanceV1_0>(
     use winapi::um::winuser::GetWindow;
     use winit::os::windows::WindowExt;
 
-    let hwnd = window.get_hwnd() as HWND;
-    let hinstance = unsafe { GetWindow(hwnd, 0) as *const vk::c_void };
-    let win32_create_info = vk::Win32SurfaceCreateInfoKHR {
-        s_type: vk::StructureType::Win32SurfaceCreateInfoKhr,
-        p_next: ptr::null(),
-        flags: Default::default(),
-        hinstance: hinstance,
-        hwnd: hwnd as *const vk::c_void,
-    };
-    let win32_surface_loader =
-        Win32Surface::new(entry, instance).expect("Unable to load win32 surface");
-    unsafe { win32_surface_loader.create_win32_surface_khr(&win32_create_info, None) }
+    unsafe {
+        let hwnd = window.get_hwnd() as HWND;
+        let hinstance = unsafe { GetWindow(hwnd, 0) as *const vk::c_void };
+        let win32_create_info = vk::Win32SurfaceCreateInfoKHR {
+            s_type: vk::StructureType::Win32SurfaceCreateInfoKhr,
+            p_next: ptr::null(),
+            flags: Default::default(),
+            hinstance: hinstance,
+            hwnd: hwnd as *const vk::c_void,
+        };
+        let win32_surface_loader =
+            Win32Surface::new(entry, instance).expect("Unable to load win32 surface");
+        unsafe { win32_surface_loader.create_win32_surface_khr(&win32_create_info, None) }
+    }
 }
 
 /// Fetch the optimal surface format from the present queue

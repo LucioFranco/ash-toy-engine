@@ -5,6 +5,13 @@ extern crate winit;
 #[cfg(target_os = "windows")]
 extern crate winapi;
 
+#[cfg(target_os = "macos")]
+extern crate cocoa;
+#[cfg(target_os = "macos")]
+extern crate metal_rs as metal;
+#[cfg(target_os = "macos")]
+extern crate objc;
+
 mod application;
 mod engine;
 mod shader;

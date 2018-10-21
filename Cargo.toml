@@ -6,4 +6,12 @@ authors = ["Lucio Franco <luciofranco14@gmail.com>"]
 [dependencies]
 ash = "0.24"
 winit = "0.17"
-winapi = "*"
+
+[target.'cfg(windows)'.dependencies]
+winapi = { version = "0.3.4", features = ["windef", "winuser"] }
+
+
+[target.'cfg(target_os = "macos")'.dependencies]
+metal-rs = "0.6"
+cocoa = "0.13"
+objc = "0.2.2"

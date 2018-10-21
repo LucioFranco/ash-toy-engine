@@ -17,6 +17,9 @@ use engine::{command_pool, fence, image, instance, pipeline, semaphore, surface,
 #[cfg(target_os = "windows")]
 use ash::extensions::Win32Surface;
 
+#[cfg(target_os = "macos")]
+use ash::extensions::MacOSSurface;
+
 use ash::extensions::{DebugReport, Surface, Swapchain};
 
 pub struct Application {
